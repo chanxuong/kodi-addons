@@ -1,4 +1,4 @@
-import CommonFunctions as common
+
 import urllib
 import urllib2
 import os
@@ -96,7 +96,7 @@ def get_category(url):
 def get_episodes(url):
 	content = make_request(url)
 	soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
-	watchUrl = soup.find('a', {'class': 'btn-watch'})
+	watchUrl = soup.find('a', {'id': 'btn-film-watch'})
 	if watchUrl is not None:
 		content = make_request(watchUrl['href'])
 		soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
@@ -139,6 +139,9 @@ def resolve_url(url):
 			startIndex = s.index('"')+1
 			endIndex = s.index('"', startIndex+1)
 			url = s[startIndex:endIndex]
+			print url
+		if s.startswith('label:') and '480' in s:
+			break;
 		if s.startswith('],'):
 			break
 	if url is not None:
