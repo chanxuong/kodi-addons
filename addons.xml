@@ -2,7 +2,7 @@
 <addons>
 <addon id="plugin.video.phimonline"
        name="PhimOnline"
-       version="1.0.1"
+       version="1.0.2"
        provider-name="PhimOnline">
     <requires>
 		<import addon="xbmc.python" version="2.1.0" />
@@ -23,7 +23,7 @@
 
 <addon id="plugin.video.vntvnet"
        name="VN TVNet"
-       version="1.0.0"
+       version="1.0.1"
        provider-name="VN TVNet">
     <requires>
 		<import addon="xbmc.python" version="2.1.0" />

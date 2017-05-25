@@ -18,6 +18,7 @@ except:
 __settings__ = xbmcaddon.Addon(id='plugin.video.phimonline')
 __language__ = __settings__.getLocalizedString
 home = __settings__.getAddonInfo('path')
+videoQuality = __settings__.getSetting('quality')
 icon = xbmc.translatePath( os.path.join( home, 'icon.png' ) )
 
 
@@ -140,8 +141,16 @@ def resolve_url(url):
 			endIndex = s.index('"', startIndex+1)
 			url = s[startIndex:endIndex]
 			print url
-		if s.startswith('label:') and '480' in s:
-			break;
+		if s.startswith('label:'):
+			startIndex = s.index('"')+1
+			endIndex = s.index('"', startIndex+1)
+			currentQuality = s[startIndex:endIndex]
+			print "Current Quality: ", currentQuality
+			print "Selected Quality: ", videoQuality
+			if currentQuality.isdigit() and currentQuality == videoQuality:
+				break;
+			if currentQuality.isdigit() and int(currentQuality) > int(videoQuality):
+				break;
 		if s.startswith('],'):
 			break
 	if url is not None:
