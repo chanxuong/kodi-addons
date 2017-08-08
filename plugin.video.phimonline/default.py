@@ -1,4 +1,4 @@
-
+import urlparse
 import urllib
 import urllib2
 import os
@@ -98,17 +98,23 @@ def get_episodes(url):
 	content = make_request(url)
 	soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
 	watchUrl = soup.find('a', {'id': 'btn-film-watch'})
+	
 	if watchUrl is not None:
-		content = make_request(watchUrl['href'])
-		soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
-		divTaps = soup.findAll('div', {'class' : 'page-tap'})
-		if divTaps is not None and len(divTaps) > 2:
-			divTap = divTaps[2]
-			links = divTap.findAll('a')
-			for link in links:
-				add_link(link['title'], link['href'], icon)
-		else:
-			add_link('Full', watchUrl['href'], icon)
+		query_strings = urlparse.parse_qs(urlparse.urlsplit(watchUrl['href']).query)
+
+		if query_strings['utm_id'] is not None:
+			content = make_request(urllib.unquote_plus(query_strings['utm_id'][0]))
+		
+			soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
+			divTaps = soup.findAll('div', {'class' : 'page-tap'})
+)
+			if divTaps is not None and len(divTaps) > 2:
+				divTap = divTaps[2]
+				links = divTap.findAll('a')
+				for link in links:
+					add_link(link['title'], link['href'], icon)
+			else:
+				add_link('Full', watchUrl['href'], icon)
 
 
 
