@@ -104,10 +104,8 @@ def get_episodes(url):
 
 		if query_strings['utm_id'] is not None:
 			content = make_request(urllib.unquote_plus(query_strings['utm_id'][0]))
-		
 			soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
 			divTaps = soup.findAll('div', {'class' : 'page-tap'})
-)
 			if divTaps is not None and len(divTaps) > 2:
 				divTap = divTaps[2]
 				links = divTap.findAll('a')
