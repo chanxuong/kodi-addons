@@ -106,8 +106,8 @@ def get_episodes(url):
 			content = make_request(urllib.unquote_plus(query_strings['utm_id'][0]))
 			soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
 			divTaps = soup.findAll('div', {'class' : 'page-tap'})
-			if divTaps is not None and len(divTaps) > 2:
-				divTap = divTaps[2]
+			if divTaps is not None:
+				divTap = divTaps[0]
 				links = divTap.findAll('a')
 				for link in links:
 					add_link(link['title'], link['href'], icon)
