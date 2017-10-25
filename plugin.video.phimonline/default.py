@@ -100,19 +100,17 @@ def get_episodes(url):
 	watchUrl = soup.find('a', {'id': 'btn-film-watch'})
 	
 	if watchUrl is not None:
-		query_strings = urlparse.parse_qs(urlparse.urlsplit(watchUrl['href']).query)
 
-		if query_strings['utm_id'] is not None:
-			content = make_request(urllib.unquote_plus(query_strings['utm_id'][0]))
-			soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
-			divTaps = soup.findAll('div', {'class' : 'page-tap'})
-			if divTaps is not None:
-				divTap = divTaps[0]
-				links = divTap.findAll('a')
-				for link in links:
-					add_link(link['title'], link['href'], icon)
-			else:
-				add_link('Full', watchUrl['href'], icon)
+		content = make_request(watchUrl)
+		soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
+		divTaps = soup.findAll('div', {'class' : 'page-tap'})
+		if divTaps is not None:
+			divTap = divTaps[0]
+			links = divTap.findAll('a')
+			for link in links:
+				add_link(link['title'], link['href'], icon)
+		else:
+			add_link('Full', watchUrl['href'], icon)
 
 
 
