@@ -100,8 +100,7 @@ def get_episodes(url):
 	watchUrl = soup.find('a', {'id': 'btn-film-watch'})
 	
 	if watchUrl is not None:
-
-		content = make_request(watchUrl)
+		content = make_request(watchUrl['href'])
 		soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
 		divTaps = soup.findAll('div', {'class' : 'page-tap'})
 		if divTaps is not None:
