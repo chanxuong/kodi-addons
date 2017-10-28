@@ -101,7 +101,8 @@ def get_episodes(url):
 	
 	if watchUrl is not None:
 		filmUrl = watchUrl['href']
-		if watchUrl['href']).query is not None:
+		if urlparse.urlsplit(watchUrl['href']).query is not None:
+			query_strings = urlparse.parse_qs(urlparse.urlsplit(watchUrl['href']).query)
 			if query_strings['utm_id'] is not None:
 				filmUrl = urllib.unquote_plus(query_strings['utm_id'][0])
 		content = make_request(filmUrl)
