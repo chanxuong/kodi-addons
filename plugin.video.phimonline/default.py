@@ -95,26 +95,27 @@ def get_category(url):
 	
 
 def get_episodes(url):
-	content = make_request(url)
-	soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
-	watchUrl = soup.find('a', {'id': 'btn-film-watch'})
+	filmUrl = url + "tap-1.html"
+	# content = make_request(url)
+	# soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
+	# watchUrl = soup.find('a', {'id': 'btn-film-watch'})
 	
-	if watchUrl is not None:
-		filmUrl = watchUrl['href']
-		if urlparse.urlsplit(watchUrl['href']).query is not None:
-			query_strings = urlparse.parse_qs(urlparse.urlsplit(watchUrl['href']).query)
-			if query_strings['utm_id'] is not None:
-				filmUrl = urllib.unquote_plus(query_strings['utm_id'][0])
-		content = make_request(filmUrl)
-		soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
-		divTaps = soup.findAll('div', {'class' : 'page-tap'})
-		if divTaps is not None:
-			divTap = divTaps[0]
-			links = divTap.findAll('a')
-			for link in links:
-				add_link(link['title'], link['href'], icon)
-		else:
-			add_link('Full', watchUrl['href'], icon)
+	# if watchUrl is not None:
+		# filmUrl = watchUrl['href']
+		# if urlparse.urlsplit(watchUrl['href']).query is not None:
+			# query_strings = urlparse.parse_qs(urlparse.urlsplit(watchUrl['href']).query)
+			# if query_strings['utm_id'] is not None:
+				# filmUrl = urllib.unquote_plus(query_strings['utm_id'][0])
+	content = make_request(filmUrl)
+	soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
+	divTaps = soup.findAll('div', {'class' : 'page-tap'})
+	if divTaps is not None:
+		divTap = divTaps[0]
+		links = divTap.findAll('a')
+		for link in links:
+			add_link(link['title'], link['href'], icon)
+	else:
+		add_link('Full', watchUrl['href'], icon)
 
 
 
