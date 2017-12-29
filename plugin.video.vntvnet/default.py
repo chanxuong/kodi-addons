@@ -53,7 +53,7 @@ def get_channels():
 				item_url = item_link['href']
 				item_name = item_url[item_url.rfind('/')+1:]
 				if item_image is not None:
-					add_link(item_name, 'http://vn.tvnet.gov.vn' + item_link['href'], item_image['src'])
+					add_link(item_name, 'http://vn.tvnet.gov.vn' + item_link['href'] + '?re=1', item_image['src'])
 				else:
 					add_link(item_name, 'http://vn.tvnet.gov.vn' + item_link['href'], icon)
 
