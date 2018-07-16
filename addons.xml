@@ -23,7 +23,7 @@
 
 <addon id="plugin.video.vntvnet"
        name="VN TVNet"
-       version="1.0.2"
+       version="1.0.3"
        provider-name="VN TVNet">
     <requires>
 		<import addon="xbmc.python" version="2.1.0" />
