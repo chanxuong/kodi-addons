@@ -57,9 +57,13 @@ def get_channels():
 				else:
 					add_vntvnetlink(item_name, 'http://vn.tvnet.gov.vn' + item_link['href'], icon)
 	add_directurl('ANTV', 'http://antvlive.ab5c6921.cdnviet.com/antvmobile/playlist.m3u8', 'http://img.hplus.com.vn/460x260/poster/2018/06/05/524177-anninh.png')
+	add_hpluslink('HTV9', 'http://hplus.com.vn/xem-kenh-htv9-hd-2667.html', 'http://img.hplus.com.vn/460x260/poster/2018/07/16/422430-665121-HTV9HD.png')
+	add_hpluslink('HTV7', 'http://hplus.com.vn/xem-kenh-htv7-hd-256.html', 'http://img.hplus.com.vn/460x260/poster/2018/07/16/928755-665121-HTV7HD.png')
 	add_hpluslink('HTV2', 'http://hplus.com.vn/xem-kenh-htv2-hd-2669.html', 'http://img.hplus.com.vn/460x260/poster/2018/06/05/857149-HTV2.png')
 	add_hpluslink('HTV3', 'http://hplus.com.vn/xem-kenh-htv3-2535.html', 'http://img.hplus.com.vn/460x260/poster/2018/06/05/750643-HTV3.png')
 	add_hpluslink('HTV3', 'http://hplus.com.vn/xem-kenh-htv3-2535.html', 'http://img.hplus.com.vn/460x260/poster/2018/06/05/750643-HTV3.png')
+	add_hpluslink('FBNC', 'http://hplus.com.vn/xem-kenh-fbnc-2184.html', 'http://img.hplus.com.vn/460x260/poster/2018/06/05/906484-FBNC.png')
+	
 
 def add_directurl(name, href, thumb):
 	u=sys.argv[0]+"?url="+urllib.quote_plus(href.encode('utf8'))+"&mode=2"
@@ -123,8 +127,9 @@ def resolve_hplusurl(url):
 		video_url = link_input['value']
 		if video_url is not None:
 			headers = {
-				'Accept':'*/*'
-				
+				'Accept':'*/*',
+				'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8',
+				'Referer': url
 			}
 			form_fields = {
 				"type": 1,

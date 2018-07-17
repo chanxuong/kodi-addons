@@ -43,8 +43,8 @@ def make_request(url, headers=None):
 					print 'We failed with error code - %s.' % e.code
 
 def get_categories():
-	add_dir('Phim Bo', 'http://www.phim.media/phim-bo/', 1, icon, 1)
-	add_dir('Phim Le', 'http://www.phim.media/phim-le/', 1, icon, 1)
+	add_dir('Phim Bo', 'http://www.phimmedia.tv/phim-bo/', 1, icon, 1)
+	add_dir('Phim Le', 'http://www.phimmedia.tv/phim-le/', 1, icon, 1)
 	add_dir('Search', '', 4, icon, 1)
 	
 def search():
@@ -52,7 +52,7 @@ def search():
 	kb.doModal()
 	if (kb.isConfirmed()):
 		text = kb.getText()
-		url = 'http://www.phim.media/index.php?keyword=' + text + '&do=phim&act=search'
+		url = 'http://www.phimmedia.tv/index.php?keyword=' + text + '&do=phim&act=search'
 		content = make_request(url)
 		soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
 		listPhim = soup.find('ul', {'class' : 'list-film'})
@@ -144,22 +144,13 @@ def resolve_url(url):
 	url = None
 	for line in content.splitlines():
 		s = line.strip()
-		if s.startswith('file:'):
+		if s.find('file:') >= 0:
 			startIndex = s.index('"')+1
 			endIndex = s.index('"', startIndex+1)
 			url = s[startIndex:endIndex]
 			print url
-		if s.startswith('label:'):
-			startIndex = s.index('"')+1
-			endIndex = s.index('"', startIndex+1)
-			currentQuality = s[startIndex:endIndex]
-			print "Current Quality: ", currentQuality
-			print "Selected Quality: ", videoQuality
-			if currentQuality.isdigit() and currentQuality == videoQuality:
-				break;
-			if currentQuality.isdigit() and int(currentQuality) > int(videoQuality):
-				break;
-		if s.startswith('],'):
+		
+		if s.startswith(']'):
 			break
 	if url is not None:
 		item = xbmcgui.ListItem(path=url)
