@@ -110,10 +110,12 @@ def get_episodes(url):
 	soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
 	divTaps = soup.findAll('div', {'class' : 'page-tap'})
 	if divTaps is not None:
-		divTap = divTaps[0]
-		links = divTap.findAll('a')
-		for link in links:
-			add_link(link['title'], link['href'], icon)
+		for divTap in divTaps:
+			serverContainer = divTap.parent
+			serverName = serverContainer.find("h4")
+			links = divTap.findAll('a')
+			for link in links:
+				add_link(link['title'] + " (" + serverName.text + ")", link['href'], icon)
 	else:
 		add_link('Full', watchUrl['href'], icon)
 
@@ -216,5 +218,4 @@ elif mode==3:
 	resolve_url(url)
 elif mode==4:
 	search()
-
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
