@@ -8,6 +8,8 @@ import xbmcaddon
 import urlfetch
 import re
 import json
+from StringIO import StringIO
+import gzip
 from BeautifulSoup import BeautifulSoup
 
 try:
@@ -29,11 +31,19 @@ def make_request(url, headers=None):
 			headers = {'User-agent' : 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:15.0) Gecko/20100101 Firefox/15.0.1',
 								 'Referer' : 'http://www.google.com'}
 	try:
+			if 'tv.zing.vn' not in url:
+				url = 'https://tv.zing.vn' + url 
 			url = url.replace(' ', '+')
 			req = urllib2.Request(url,headers=headers)
-			f = urllib2.urlopen(req)
-			body=f.read()
-			return body
+			response = urllib2.urlopen(req)
+			if response.info().get('Content-Encoding') == 'gzip':
+				buf = StringIO(response.read())
+				f = gzip.GzipFile(fileobj=buf)
+				data = f.read()
+				return data
+			else:
+				body=response.read()
+				return body
 	except urllib2.URLError, e:
 			print 'We failed to open "%s".' % url
 			if hasattr(e, 'reason'):
@@ -43,16 +53,21 @@ def make_request(url, headers=None):
 					print 'We failed with error code - %s.' % e.code
 
 def get_categories():
-	content = make_request(https://tv.zing.vn)
+	content = make_request('https://tv.zing.vn')
+	
 	soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
 	mainNav = soup.find('div', {'class' : 'main-nav'})
 	if mainNav is not None:
-		subNavs = mainNav.findAll('div', {'class' : 'sub-nav'})
+		print 'Main Nav'
+		subNavs = mainNav.findAll('div', {'class': lambda x: x 
+                       and 'sub-nav' in x.split()
+             })
 		for subNav in subNavs:
+			print 'Sub Navs'
 			items = subNav.findAll('a')
 			for item in items:
 				try:
-					add_dir(item['title'],item['href'],2,icon,1)
+					add_dir(item['title'],item['href'],1,icon,1)
 				except:
 					pass
 			
@@ -80,53 +95,33 @@ def search():
 def get_category(url):
 	content = make_request(url)
 	soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
-	listPhim = soup.find('ul', {'class' : 'list-film'})
-	if listPhim is not None:
-		items = listPhim.findAll('li')
-		for item in items:
-			itemDiv = item.find('div', {'class' : 'name'})
-			itemImage = item.find('img')
-			if itemDiv is not None:
-				itemLink = itemDiv.find('a')
-				try:
-					add_dir(itemLink['title'],itemLink['href'],2,itemImage['src'].replace("show_image.php?file=","").replace("&w=300&h=400",""),1)
-				except:
-					pass
-	paging = soup.find('div', {'class' : 'Paging'})
-	if paging is not None:
-		nextPage = paging.find('a', {'class':'NextBtn'})
-		if nextPage is not None:
-			add_dir('--Next--', nextPage['href'], 1, icon, 1)
-		prevPage = paging.find('a', {'class':'PrevBtn'})
-		if prevPage is not None:
-			add_dir('--Previous--', prevPage['href'], 1, icon, 1)
+	items = soup.findAll('div', {'class':'item'})
+	for item in items:
+		itemThumb = item.find('a', {'class':'thumb'})
+		itemImage = itemThumb.find('img')
+		itemTitle = item.find('h2')
+		itemLink = itemTitle.find('a')
+		if itemLink is not None:
+			
+			try:
+				add_dir(itemLink['title'],itemLink['href'],2,itemImage['src'],1)
+			except:
+				pass
+	paging = soup.find('div', {'class' : 'paging'})
+	
+		
 
 	
 
 def get_episodes(url):
-	filmUrl = url + "tap-1.html"
-	# content = make_request(url)
-	# soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
-	# watchUrl = soup.find('a', {'id': 'btn-film-watch'})
-	
-	# if watchUrl is not None:
-		# filmUrl = watchUrl['href']
-		# if urlparse.urlsplit(watchUrl['href']).query is not None:
-			# query_strings = urlparse.parse_qs(urlparse.urlsplit(watchUrl['href']).query)
-			# if query_strings['utm_id'] is not None:
-				# filmUrl = urllib.unquote_plus(query_strings['utm_id'][0])
-	content = make_request(filmUrl)
+	content = make_request(url)
 	soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
-	divTaps = soup.findAll('div', {'class' : 'page-tap'})
+	divTaps = soup.findAll('div', {'itemprop' : 'episode'})
 	if divTaps is not None:
 		for divTap in divTaps:
-			serverContainer = divTap.parent
-			serverName = serverContainer.find("h4")
-			links = divTap.findAll('a')
-			for link in links:
-				add_link(link['title'] + " (" + serverName.text + ")", link['href'], icon)
-	else:
-		add_link('Full', watchUrl['href'], icon)
+			divDesc = divTap.find('div', {'class':'description'})
+			link = divDesc.find('a')
+			add_link(link['title'], link['href'], icon)
 
 
 
@@ -153,16 +148,16 @@ def resolve_url(url):
 	content = make_request(url)
 	ok=True
 	url = None
+	
 	for line in content.splitlines():
 		s = line.strip()
-		if s.find('file:') >= 0:
+		if s.find('source:') >= 0:
+			
 			startIndex = s.index('"')+1
 			endIndex = s.index('"', startIndex+1)
 			url = s[startIndex:endIndex]
-			print url
-		
-		if s.startswith(']'):
 			break
+		
 	if url is not None:
 		item = xbmcgui.ListItem(path=url)
 		xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
