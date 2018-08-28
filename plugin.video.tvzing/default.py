@@ -108,20 +108,46 @@ def get_category(url):
 			except:
 				pass
 	paging = soup.find('div', {'class' : 'paging'})
-	
-		
-
+	if paging is not None:
+		pagingLinks = paging.findAll('a')
+		for pagingLink in pagingLinks:
+			if pagingLink.text == 'Sau':
+				add_dir('--Next--',pagingLink['href'],1,icon,1)
+				break
 	
 
 def get_episodes(url):
 	content = make_request(url)
 	soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
-	divTaps = soup.findAll('div', {'itemprop' : 'episode'})
-	if divTaps is not None:
-		for divTap in divTaps:
-			divDesc = divTap.find('div', {'class':'description'})
-			link = divDesc.find('a')
-			add_link(link['title'], link['href'], icon)
+	
+	viewAllLink = soup.find('a', {'class': 'view-all'})
+	if viewAllLink is not None:
+		content = make_request(viewAllLink['href'])
+		soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
+		divTaps = soup.findAll('div', {'itemprop' : 'episode'})
+		if divTaps is not None:
+			for divTap in divTaps:
+				divDesc = divTap.find('div', {'class':'box-description'})
+				link = divDesc.find('a')
+				add_link(link.text, link['href'], icon)
+		paging = soup.find('div', {'class':'paging'})
+		if paging is not None:
+			pagingLinks = paging.findAll('a')
+			if pagingLinks is not None:
+				if len(pagingLinks) > 3:
+					i = 1
+					while i < (len(pagingLinks)-2):
+						pagingLink	= pagingLinks[i]
+						
+						content = make_request(pagingLink['href'])
+						soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
+						divTaps = soup.findAll('div', {'itemprop' : 'episode'})
+						if divTaps is not None:
+							for divTap in divTaps:
+								divDesc = divTap.find('div', {'class':'box-description'})
+								link = divDesc.find('a')
+								add_link(link.text, link['href'], icon)
+						i += 1
 
 
 

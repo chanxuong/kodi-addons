@@ -23,7 +23,7 @@
 
 <addon id="plugin.video.tvzing"
        name="TV Zing"
-       version="0.0.2"
+       version="0.0.3"
        provider-name="tvzing">
     <requires>
 		<import addon="xbmc.python" version="2.1.0" />
