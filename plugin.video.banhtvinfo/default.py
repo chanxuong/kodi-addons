@@ -15,7 +15,7 @@ try:
 except:
     import simplejson as json
 
-__settings__ = xbmcaddon.Addon(id='plugin.video.phimonline')
+__settings__ = xbmcaddon.Addon(id='plugin.video.banhtvinfo')
 __language__ = __settings__.getLocalizedString
 home = __settings__.getAddonInfo('path')
 videoQuality = __settings__.getSetting('quality')
@@ -81,7 +81,7 @@ def get_category(url):
 		for item in items:
 			divImage = item.find('div', {'class': 'public-film-item-thumb ratio-content'})
 			
-			var imageUrl = divImage['style'].split("url('")[1].split("')")[0]
+			imageUrl = divImage['style'].split("url('")[1].split("')")[0]
 			itemLink = item.find('a')
 			try:
 				add_dir(itemLink['title'],itemLink['href'],2,imageUrl,1)
@@ -89,43 +89,38 @@ def get_category(url):
 				pass
 	paging = soup.find('ul', {'class' : 'pagination pagination-lg'})
 	if paging is not None:
-		nextPage = paging.findAll('li')
-		
-		add_dir('--Next--', nextPage[-1]['href'], 1, icon, 1)
+		pages = paging.findAll('li')
+		nextPage = pages[-1]
+		nextPageLink = nextPage.find('a')
+		add_dir('--Next--', nextPageLink['href'], 1, icon, 1)
 		
 
 	
 
 def get_episodes(url):
-	filmUrl = url + "tap-1.html"
-	# content = make_request(url)
-	# soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
-	# watchUrl = soup.find('a', {'id': 'btn-film-watch'})
+	filmUrl = url + "xem-phim.html"
 	
-	# if watchUrl is not None:
-		# filmUrl = watchUrl['href']
-		# if urlparse.urlsplit(watchUrl['href']).query is not None:
-			# query_strings = urlparse.parse_qs(urlparse.urlsplit(watchUrl['href']).query)
-			# if query_strings['utm_id'] is not None:
-				# filmUrl = urllib.unquote_plus(query_strings['utm_id'][0])
 	content = make_request(filmUrl)
 	soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
-	divTaps = soup.findAll('div', {'class' : 'page-tap'})
-	if divTaps is not None:
-		for divTap in divTaps:
-			serverContainer = divTap.parent
-			serverName = serverContainer.find("h4")
-			links = divTap.findAll('a')
-			for link in links:
-				add_link(link['title'] + " (" + serverName.text + ")", link['href'], icon)
-	else:
-		add_link('Full', watchUrl['href'], icon)
+	
+	episodes = soup.findAll('li', {'class': lambda x: x 
+                       and 'episode' in x.split()
+             })
+	if episodes is not None:
+		for eps in episodes:
+			episodeContainer = eps.parent
+			serverContainer = episodeContainer.parent
+			serverName = serverContainer.find("h3")
+			link = eps.find('a')
+			if link is not None:
+				add_link(link['title'] + " (" + serverName.text + ")", link['data-id'], link['data-hash'], icon)
+	
 
 
 
 
-def add_link(name, href, thumb):
-	u=sys.argv[0]+"?url="+urllib.quote_plus(href.encode('utf8'))+"&mode=3"
+def add_link(name, id, hash, thumb):
+	u=sys.argv[0]+"?id="+urllib.quote_plus(id.encode('utf8'))+"&hash="+urllib.quote_plus(hash.encode('utf8'))+"&mode=3"
 	liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=thumb)
 	liz.setInfo(type="Video", infoLabels={ "Title": name})
 	liz.setProperty('IsPlayable', 'true')
@@ -142,23 +137,40 @@ def add_dir(name,url,mode,iconimage,pagenum):
 	return ok
 	
 
-def resolve_url(url):
-	content = make_request(url)
+def resolve_url(id, hash):
+	print 'testtest'
+	requestUrlHeaders = {'Content-Type':'application/x-www-form-urlencoded'}
+	form_fields = {
+				"id": id,
+				"link": hash,
+	}
+
+	response = urlfetch.fetch(
+				url = 'http://banhtv.info/ajax/player',
+				method='POST',
+				headers = requestUrlHeaders,
+				data=form_fields,
+				follow_redirects = False
+	)
+	data =  json.loads(response.content)
+	print 'test', response.content
 	ok=True
 	url = None
-	for line in content.splitlines():
-		s = line.strip()
-		if s.find('file:') >= 0:
-			startIndex = s.index('"')+1
-			endIndex = s.index('"', startIndex+1)
-			url = s[startIndex:endIndex]
-			print url
-		
-		if s.startswith(']'):
-			break
-	if url is not None:
-		item = xbmcgui.ListItem(path=url)
-		xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
+	if data['playTech'] == 'iframe':
+		if data['link'] is not None:
+			content = make_request('http://banhtv.info/iframe/?link=' + data['link'])
+			jsonData = content.split("JSON.parse('")[1].split("');")[0]
+			links = json.loads(jsonData)
+			print 'test88', jsonData
+			for link in links:
+				if link['type'] == "mp4":
+					item = xbmcgui.ListItem(path=link['file'])
+					xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
+					break
+	else:
+		if data['link'] is not None:
+			item = xbmcgui.ListItem(path=data['link'][0]['file'])
+			xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 	return ok	
 
 	
@@ -187,7 +199,8 @@ params=get_params()
 url=''
 name=None
 mode=None
-pagenum=None
+id=None
+hash=None
 try:
 	url=urllib.unquote_plus(params["url"])
 except:
@@ -201,10 +214,13 @@ try:
 except:
 	pass
 try:
-	pagenum=int(params["pagenum"])
+	id=urllib.unquote_plus(params["id"])
 except:
 	pass
-
+try:
+	hash=urllib.unquote_plus(params["hash"])
+except:
+	pass
 
 if mode==None:
 	#if not login():
@@ -217,7 +233,8 @@ elif mode==1:
 elif mode==2:
 	get_episodes(url)
 elif mode==3:
-	resolve_url(url)
+
+	resolve_url(id, hash)
 elif mode==4:
 	search()
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
