@@ -144,7 +144,7 @@ if mode==None:
 
 elif mode==1:
 	resolve_vntvneturl(url)
-elif mode==2:
+
 
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
