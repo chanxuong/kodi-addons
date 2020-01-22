@@ -41,7 +41,7 @@ def make_request(url, headers=None):
 					print 'We failed with error code - %s.' % e.code
 
 def get_channels():
-	content = make_request('http://vn.tvnet.gov.vn/kenh-truyen-hinh/danh-sach')
+	content = make_request('http://au.tvnet.gov.vn/kenh-truyen-hinh/danh-sach')
 	soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
 	channel_list = soup.find('ul', {'class' : 'listing channel clearfix'})
 	if channel_list is not None:
@@ -53,20 +53,10 @@ def get_channels():
 				item_url = item_link['href']
 				item_name = item_url[item_url.rfind('/')+1:]
 				if item_image is not None:
-					add_vntvnetlink(item_name, 'http://vn.tvnet.gov.vn' + item_link['href'] + '?re=1', item_image['src'])
+					add_vntvnetlink(item_name, 'http://au.tvnet.gov.vn' + item_link['href'] + '?re=1', item_image['src'])
 				else:
-					add_vntvnetlink(item_name, 'http://vn.tvnet.gov.vn' + item_link['href'], icon)
-	add_directurl('ANTV', 'http://antvlive.ab5c6921.cdnviet.com/antvmobile/playlist.m3u8', 'http://img.hplus.com.vn/460x260/poster/2018/06/05/524177-anninh.png')
-	add_hpluslink('HTV9 HD', 'http://hplus.com.vn/xem-kenh-htv9-hd-2667.html', 'http://img.hplus.com.vn/460x260/poster/2018/07/16/422430-665121-HTV9HD.png')
-	add_hpluslink('HTV7 HD', 'http://hplus.com.vn/xem-kenh-htv7-hd-256.html', 'http://img.hplus.com.vn/460x260/poster/2018/07/16/928755-665121-HTV7HD.png')
-	
+					add_vntvnetlink(item_name, 'http://au.tvnet.gov.vn' + item_link['href'], icon)
 
-def add_directurl(name, href, thumb):
-	u=sys.argv[0]+"?url="+urllib.quote_plus(href.encode('utf8'))+"&mode=2"
-	liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=thumb)
-	liz.setInfo(type="Video", infoLabels={ "Title": name})
-	liz.setProperty('IsPlayable', 'true')
-	ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz)
 
 def add_vntvnetlink(name, href, thumb):
 	u=sys.argv[0]+"?url="+urllib.quote_plus(href.encode('utf8'))+"&mode=1"
@@ -74,12 +64,7 @@ def add_vntvnetlink(name, href, thumb):
 	liz.setInfo(type="Video", infoLabels={ "Title": name})
 	liz.setProperty('IsPlayable', 'true')
 	ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz)
-def add_hpluslink(name, href, thumb):
-	u=sys.argv[0]+"?url="+urllib.quote_plus(href.encode('utf8'))+"&mode=3"
-	liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=thumb)
-	liz.setInfo(type="Video", infoLabels={ "Title": name})
-	liz.setProperty('IsPlayable', 'true')
-	ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz)
+
 
 
 def add_dir(name,url,mode,iconimage,pagenum):
@@ -106,46 +91,7 @@ def resolve_vntvneturl(url):
 			item = xbmcgui.ListItem(path=stream['url'])
 			xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 	return ok	
-def resolve_directurl(url):
-	print 'resolve direct url'
-	ok=True
-	item = xbmcgui.ListItem(path=url)
-	xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
-	return ok	
-def resolve_hplusurl(url):
-	ok=True
-	content = make_request(url)
-	
-	soup = BeautifulSoup(str(content), convertEntities=BeautifulSoup.HTML_ENTITIES)
-	link_input = soup.find('input', {'id' : 'link-live'})
-	if link_input is not None:
-	
-		video_url = link_input['value']
-		if video_url is not None:
-			headers = {
-				'Accept':'*/*',
-				'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8',
-				'Referer': url
-			}
-			form_fields = {
-				"type": 1,
-				"is_mobile": 0,
-				"url": video_url
-			}
 
-			
-			response = urlfetch.fetch(
-				url = 'http://hplus.com.vn/content/getlinkvideo/',
-				method='POST',
-				headers = headers,
-				data=form_fields,
-				follow_redirects = False
-			)
-			
-			print 'test: ', response.content
-			item = xbmcgui.ListItem(path= response.content)
-			xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
-	return ok	
 def get_params():
 	param=[]
 	paramstring=sys.argv[2]
@@ -199,8 +145,6 @@ if mode==None:
 elif mode==1:
 	resolve_vntvneturl(url)
 elif mode==2:
-	resolve_directurl(url)
-elif mode==3:
-	resolve_hplusurl(url)
+
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
