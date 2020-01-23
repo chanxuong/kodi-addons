@@ -92,14 +92,14 @@ def get_channels():
 	
 
 def add_vntvnetlink(name, href, thumb):
-	u=sys.argv[0]+"?url="+urllib.quote_plus(href.encode('utf8'))+"&mode=5"
+	u=sys.argv[0]+"?url="+urllib.quote_plus(href.encode('utf8'))+"&mode=1"
 	liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=thumb)
 	liz.setInfo(type="Video", infoLabels={ "Title": name})
 	liz.setProperty('IsPlayable', 'true')
 	ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz)
 
 def add_videolink(name, href, thumb):
-	u=sys.argv[0]+"?url="+urllib.quote_plus(href.encode('utf8'))+"&mode=1"
+	u=sys.argv[0]+"?url="+urllib.quote_plus(href.encode('utf8'))+"&mode=5"
 	liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=thumb)
 	liz.setInfo(type="Video", infoLabels={ "Title": name})
 	liz.setProperty('IsPlayable', 'true')
