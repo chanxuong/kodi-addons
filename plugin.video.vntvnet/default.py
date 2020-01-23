@@ -202,6 +202,6 @@ elif mode==3:
 	get_videocategories()
 elif mode==4:
 	get_videosincategory(url, pagenum)
-elif mode==4:
+elif mode==5:
 	resolve_video(url)
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
