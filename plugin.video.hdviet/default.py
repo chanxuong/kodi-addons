@@ -78,7 +78,7 @@ def list_movies(url):
 		# Set graphics (thumbnail, fanart, banner, poster, landscape etc.) for the list item.
 		thumb = item.select_one('img')
 		list_item.setProperty('fanart_image', thumb.get('src'))
-		list_item.setArt({'thumb': thumb.get('src')})
+		list_item.setArt({'thumb': thumb.get('src').replace('124x184', 'origins')})
 		plot = item.select_one('span.cot1')
 		
 		list_item.setInfo('video', {'title': item_link.get_text(), 'plot': plot.get_text(), 'mediatype': 'movie'})
@@ -129,7 +129,7 @@ def list_movies(url):
 
 def list_seasons_or_episodes(url):
 	xbmcplugin.setPluginCategory(_handle_, 'HDViet')
-	print('test1')
+	xbmcplugin.setContent(_handle_, 'video')
 	login()
 	response = _request_.get(url)
 	soup = BeautifulSoup(response, "html.parser")
