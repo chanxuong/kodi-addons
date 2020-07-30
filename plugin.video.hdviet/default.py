@@ -40,7 +40,7 @@ _categories_ = [
 		'url': 'http://movies.hdviet.com/phim-bo.html'
 	},
 	{
-		'label': 'Phim bộ mới dề cử',
+		'label': 'Phim bộ dề cử',
 		'url': 'http://movies.hdviet.com/phim-bo-hdviet-de-cu.html'
 	}
 ]
@@ -129,6 +129,7 @@ def list_movies(url):
 
 def list_seasons_or_episodes(url):
 	xbmcplugin.setPluginCategory(_handle_, 'HDViet')
+	print('test1')
 	login()
 	response = _request_.get(url)
 	soup = BeautifulSoup(response, "html.parser")
@@ -179,7 +180,7 @@ def play_video(url):
 	login()
 	response = _request_.get(url)
 	mid = re.search("mid:[\s]?(.*),", response).group(1)
-	sequence = re.search("Sequence:[\s]?'(.*)'", response).group(1)
+	sequence = re.search("CurrentEpisode:[\s]?'(.*)'", response).group(1)
 	response = _request_.get(_domain_ + '/get_movie_play_json?movieid=' + mid + '&sequence=' + sequence)
 	data = json.loads(response)
 	url = data.get('data').get('playList') + '|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0'
@@ -202,16 +203,18 @@ def login():
 		xbmcgui.Dialog().ok(_addon_.getAddonInfo('name'), 'This addon need a username and password from HDViet.')
 		_addon_.openSettings()
 	else: 
-		postdata = {
-			'email': _addon_.getSetting('Username') ,
-			'password': hashlib.md5(_addon_.getSetting('Password')).hexdigest(),
-			'remember': '0'
-		}
-		response = _request_.post('http://movies.hdviet.com/dang-nhap.html', params=postdata)
-		data = json.loads(response)
-		if data.get('e') != 0:
-			xbmcgui.Dialog().ok(_addon_.getAddonInfo('name'), 'Login failed. Please check your settings')
-			_addon_.openSettings()
+		if _request_.session is None or _request_.session.cookies is None or _request_.session.cookies.get('oauth_sessionhash_v22') is None or _request_.session.cookies.get('oauth_sessionhash_v22') == '':
+			
+			postdata = {
+				'email': _addon_.getSetting('Username') ,
+				'password': hashlib.md5(_addon_.getSetting('Password')).hexdigest(),
+				'remember': '0'
+			}
+			response = _request_.post('http://movies.hdviet.com/dang-nhap.html', params=postdata)
+			data = json.loads(response)
+			if data.get('e') != 0:
+				xbmcgui.Dialog().ok(_addon_.getAddonInfo('name'), 'Login failed. Please check your settings')
+				_addon_.openSettings()
 			
 def router(paramstring):
 	

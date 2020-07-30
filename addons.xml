@@ -21,7 +21,7 @@
     </extension>
 </addon>
 
-<addon id="plugin.video.hdviet" name="HDViet" version="0.0.1" provider-name="chan.xuong">
+<addon id="plugin.video.hdviet" name="HDViet" version="0.0.2" provider-name="chan.xuong">
     <requires>
         <import addon="xbmc.python" version="2.25.0"/>
         <import addon="script.module.beautifulsoup4" version="4.3.1"/>
