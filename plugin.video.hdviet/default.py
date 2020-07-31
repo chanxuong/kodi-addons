@@ -16,10 +16,11 @@ current_dir = os.path.dirname(__file__)
 sys.path.append(os.path.join(current_dir, 'resources', 'lib'))
 
 from requestutil import Request
+import xbmc_helper as XbmcHelper
 
 _baseurl_ = sys.argv[0]
 _handle_ = int(sys.argv[1])
-_domain_ = "http://movies.hdviet.com/"
+_domain_ = "http://movies.hdviet.com"
 _request_header_ = {
         'Referer': _domain_,
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0'
@@ -49,26 +50,28 @@ _auth_cookie_name_ = 'oauth_sessionhash_v22'
 
 def list_categories():
 	# Set plugin category. It is displayed in some skins as the name
-    # of the current section.
-    xbmcplugin.setPluginCategory(_handle_, 'HDViet')
-    # Set plugin content. It allows Kodi to select appropriate views
-    # for this type of content.
-    xbmcplugin.setContent(_handle_, 'videos')
-    for category in _categories_:
+	# of the current section.
+	xbmcplugin.setPluginCategory(_handle_, 'HDViet')
+	# Set plugin content. It allows Kodi to select appropriate views
+	# for this type of content.
+	xbmcplugin.setContent(_handle_, 'videos')
+	xbmcplugin.addDirectoryItem(_handle_, get_url(action='search'), xbmcgui.ListItem(label='Search...'), True)
+	for category in _categories_:
 		list_item = xbmcgui.ListItem(label=category['label'])
 		url = get_url(action='listmovies', url=category['url'])
 		xbmcplugin.addDirectoryItem(_handle_, url, list_item, True)
-	 # Finish creating a virtual folder.
-    xbmcplugin.endOfDirectory(_handle_)
+	xbmcplugin.endOfDirectory(_handle_)
 
 def list_movies(url):
+	if _addon_.getSetting('Username') != '' or _addon_.getSetting('Password') != '': 
+		login()
 	xbmcplugin.setPluginCategory(_handle_, 'HDViet')
 	xbmcplugin.setContent(_handle_, 'movies')
-	login()
 	response = _request_.get(url)
 	
 	soup = BeautifulSoup(response, "html.parser")
-	for item in soup.select('ul.box-movie-list > li'):
+	for item in soup.select('.box-movie-list > li'):
+		print('test')
 		# Create a list item with a text label and a thumbnail image.
 		item_link = item.select_one('a.mv-namevn')
 		list_item = xbmcgui.ListItem(label=item_link.get_text())
@@ -77,7 +80,7 @@ def list_movies(url):
 		#list_item.setInfo('video', {'title': item_link.get_text()})
 		# Set graphics (thumbnail, fanart, banner, poster, landscape etc.) for the list item.
 		thumb = item.select_one('img')
-		list_item.setProperty('fanart_image', thumb.get('src'))
+		list_item.setProperty('fanart_image', thumb.get('src').replace('124x184', 'origins'))
 		list_item.setArt({'thumb': thumb.get('src').replace('124x184', 'origins')})
 		plot = item.select_one('span.cot1')
 		
@@ -128,9 +131,10 @@ def list_movies(url):
 	xbmcplugin.endOfDirectory(_handle_)
 
 def list_seasons_or_episodes(url):
+	if _addon_.getSetting('Username') != '' or _addon_.getSetting('Password') != '': 
+		login()
 	xbmcplugin.setPluginCategory(_handle_, 'HDViet')
-	xbmcplugin.setContent(_handle_, 'video')
-	login()
+	xbmcplugin.setContent(_handle_, 'movies')
 	response = _request_.get(url)
 	soup = BeautifulSoup(response, "html.parser")
 	mid = re.search("mid:[\s]?(.*),", response).group(1)
@@ -161,8 +165,10 @@ def list_seasons_or_episodes(url):
 	xbmcplugin.endOfDirectory(_handle_)
 	
 def list_season_episodes(movieid):
+	if _addon_.getSetting('Username') != '' or _addon_.getSetting('Password') != '': 
+		login()
 	xbmcplugin.setPluginCategory(_handle_, 'HDViet')
-	xbmcplugin.setContent(_handle_, 'video')
+	xbmcplugin.setContent(_handle_, 'movies')
 	response = _request_.get(_domain_ + '/lay-danh-sach-tap-phim.html?id=' + movieid)
 	data = json.loads(response)
 	numberOfUploadedEpisodes = int(data.get('Sequence'))
@@ -177,7 +183,8 @@ def list_season_episodes(movieid):
 	xbmcplugin.endOfDirectory(_handle_)
 	
 def play_video(url):
-	login()
+	if _addon_.getSetting('Username') != '' or _addon_.getSetting('Password') != '': 
+		login()
 	response = _request_.get(url)
 	mid = re.search("mid:[\s]?(.*),", response).group(1)
 	sequence = re.search("CurrentEpisode:[\s]?'(.*)'", response).group(1)
@@ -214,7 +221,43 @@ def login():
 			data = json.loads(response)
 			if data.get('e') != 0:
 				xbmcgui.Dialog().ok(_addon_.getAddonInfo('name'), 'Login failed. Please check your settings')
-				_addon_.openSettings()
+
+
+def search():
+	xbmcplugin.setPluginCategory(_handle_, 'Search')
+	xbmcplugin.setContent(_handle_, 'movies')
+	url = get_url(action='dosearch')
+	xbmcplugin.addDirectoryItem(_handle_, url, xbmcgui.ListItem(label="[COLOR orange][B]%s[/B][/COLOR]" % "Enter search text ..."), True)
+
+    # Support to save search history
+	contents = XbmcHelper.search_history_get()
+	if contents:
+		url = get_url(action= 'clearsearchhistory')
+		xbmcplugin.addDirectoryItem(_handle_, url, xbmcgui.ListItem(label="[COLOR red][B]%s[/B][/COLOR]" % "Clear search text ..."), False)
+		for txt in contents:
+			try:
+				url = get_url(action='dosearch', keyword=txt)
+				xbmcplugin.addDirectoryItem(_handle_, 
+				url,
+				xbmcgui.ListItem(label="[COLOR blue][B]%s[/B][/COLOR]" % txt),
+				True)
+			except:
+				pass
+	xbmcplugin.endOfDirectory(_handle_)
+
+def do_search(keyword):
+	xbmcplugin.setPluginCategory(_handle_, 'Search Result')
+	xbmcplugin.setContent(_handle_, 'movies')
+	if not keyword:
+		keyboard = xbmc.Keyboard('', 'Search iPlayer')
+		keyboard.doModal()
+		if keyboard.isConfirmed():
+			keyword = keyboard.getText()
+
+	if not keyword:
+		return
+	XbmcHelper.search_history_save(keyword)
+	list_movies(_domain_ + '/tim-kiem.html?keyword=' + keyword)
 			
 def router(paramstring):
 	
@@ -233,6 +276,12 @@ def router(paramstring):
 		elif params['action'] == 'play':
 			# Play a video from a provided URL.
 			play_video(params['url'])
+		elif params['action'] == 'search':
+			search()
+		elif params['action'] == 'dosearch':
+			do_search(params.get('keyword'))
+		elif params['action'] == 'clearsearchhistory':
+			XbmcHelper.search_history_clear()
 		else:
 			# If the provided paramstring does not contain a supported action
 			# we raise an exception. This helps to catch coding errors,
