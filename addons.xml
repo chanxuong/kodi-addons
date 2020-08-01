@@ -21,38 +21,7 @@
     </extension>
 </addon>
 
-<addon id="plugin.video.fshare" name="Fshare" version="0.0.1" provider-name="chan.xuong">
-    <requires>
-        <import addon="xbmc.python" version="2.25.0"/>
-        <import addon="script.module.beautifulsoup4" version="4.3.1"/>
-        <import addon="script.module.requests" version="2.7.0"/>
-        <import addon="script.module.simplejson" version="3.16.1"/>
-    </requires>
-    <extension point="xbmc.python.pluginsource" library="default.py">
-        <provides>video</provides>
-    </extension>
-    <extension point="xbmc.addon.metadata">
-        <summary>HDViet addon</summary>
-        <description>This plugin allow you to watch movies or shows from Fshare source
-        </description>
-        <disclaimer>The provider is not responsible for any issues caused by using this addon.
-            Due to the nature of our content, we are not responsible for the content streamed to your device and neither
-            do we condone piracy so you must satisfy yourself that either you or the sites accessed for streaming have
-            the copyright agreements in place and are entitled to access this content.
-            We do not host or upload any video, films, media file, live streams (avi, mov, flv, mpg, mpeg, divx, dvd
-            rip, mp3, mp4, torrent, ipod, psp). KodiTips is not responsible for the accuracy, compliance, copyright,
-            legality, decency, or any other aspect of the content of streamed from your device. If you have any legal
-            issues please contact the appropriate media file owners or host sites.
-            We have no control over the links on any site that we provide a link to. If you see any form of
-            infringements, please contact appropriate media file owners or host sites immediately.
-        </disclaimer>
-        <platform>all</platform>
-        <email>chanxuong@gmail.com</email>
-
-    </extension>
-</addon>
-
-<addon id="plugin.video.hdviet" name="HDViet" version="0.0.5" provider-name="chan.xuong">
+<addon id="plugin.video.hdviet" name="HDViet" version="0.0.6" provider-name="chan.xuong">
     <requires>
         <import addon="xbmc.python" version="2.25.0"/>
         <import addon="script.module.beautifulsoup4" version="4.3.1"/>
