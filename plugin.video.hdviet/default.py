@@ -55,9 +55,12 @@ def list_categories():
 	# Set plugin content. It allows Kodi to select appropriate views
 	# for this type of content.
 	xbmcplugin.setContent(_handle_, 'videos')
-	xbmcplugin.addDirectoryItem(_handle_, get_url(action='search'), xbmcgui.ListItem(label='Search...'), True)
+	searchMenu = xbmcgui.ListItem(label='Search...')
+	searchMenu.setInfo('video', {'title': 'Tìm kiếm'})
+	xbmcplugin.addDirectoryItem(_handle_, get_url(action='search'), searchMenu, True)
 	for category in _categories_:
 		list_item = xbmcgui.ListItem(label=category['label'])
+		list_item.setInfo('video', {'title':category['label']})
 		url = get_url(action='listmovies', url=category['url'])
 		xbmcplugin.addDirectoryItem(_handle_, url, list_item, True)
 	xbmcplugin.endOfDirectory(_handle_)
