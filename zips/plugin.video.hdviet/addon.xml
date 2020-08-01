@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.hdviet" name="HDViet" version="0.0.4" provider-name="chan.xuong">
+<addon id="plugin.video.hdviet" name="HDViet" version="0.0.5" provider-name="chan.xuong">
     <requires>
         <import addon="xbmc.python" version="2.25.0"/>
         <import addon="script.module.beautifulsoup4" version="4.3.1"/>

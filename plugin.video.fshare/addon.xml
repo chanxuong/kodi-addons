@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.hdviet" name="HDViet" version="0.0.5" provider-name="chan.xuong">
+<addon id="plugin.video.fshare" name="Fshare" version="0.0.1" provider-name="chan.xuong">
     <requires>
         <import addon="xbmc.python" version="2.25.0"/>
         <import addon="script.module.beautifulsoup4" version="4.3.1"/>
@@ -11,7 +11,7 @@
     </extension>
     <extension point="xbmc.addon.metadata">
         <summary>HDViet addon</summary>
-        <description>This plugin allow you to watch movies from HDViet.com. 
+        <description>This plugin allow you to watch movies or shows from Fshare source
         </description>
         <disclaimer>The provider is not responsible for any issues caused by using this addon.
             Due to the nature of our content, we are not responsible for the content streamed to your device and neither
