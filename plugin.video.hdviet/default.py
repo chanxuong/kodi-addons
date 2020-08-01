@@ -233,7 +233,7 @@ def get_hdviet_link(url):
 			request = Request(_request_header_, session = True, cookies = { _session_cookie_name_ : _addon_.getSetting('SessionToken'), _auth_cookie_name_: _addon_.getSetting('OAuthSessionToken') })
 			response = request.get(url)
 			
-			soup = BeautifulSoup(response, "html.parser"
+			soup = BeautifulSoup(response, "html.parser")
 			if request.r.status_code == 302 or soup.select_one('li.liuser > a.userinfo') is None:
 				print('Re-login to get url')
 				isLoggedIn = login()
