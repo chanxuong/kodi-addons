@@ -30,19 +30,23 @@ _addon_ = addon = xbmcaddon.Addon()
 _categories_ = [
 	{
 		'label': 'Phim lẻ mới',
-		'url': 'http://movies.hdviet.com/phim-le.html'
+		'url': 'http://movies.hdviet.com/phim-le.html',
+		'icon': 'movie.png'
 	},
 	{
 		'label': 'Phim lẻ đề cử',
-		'url': 'http://movies.hdviet.com/phim-hdviet-de-cu.html'
+		'url': 'http://movies.hdviet.com/phim-hdviet-de-cu.html',
+		'icon': 'movie.png'
 	},
 	{
 		'label': 'Phim bộ mới',
-		'url': 'http://movies.hdviet.com/phim-bo.html'
+		'url': 'http://movies.hdviet.com/phim-bo.html',
+		'icon': 'tvshow.png'
 	},
 	{
 		'label': 'Phim bộ dề cử',
-		'url': 'http://movies.hdviet.com/phim-bo-hdviet-de-cu.html'
+		'url': 'http://movies.hdviet.com/phim-bo-hdviet-de-cu.html',
+		'icon': 'tvshow.png'
 	}
 ]
 _auth_cookie_name_ = 'oauth_sessionhash_v22'
@@ -55,12 +59,15 @@ def list_categories():
 	# Set plugin content. It allows Kodi to select appropriate views
 	# for this type of content.
 	xbmcplugin.setContent(_handle_, 'videos')
-	searchMenu = xbmcgui.ListItem(label='Search...')
+	searchMenu = xbmcgui.ListItem(label='Tìm kiếm...')
+	searchMenu.setArt({'thumb': os.path.join(current_dir, 'resources', 'search.png')})
+	
 	searchMenu.setInfo('video', {'title': 'Tìm kiếm'})
 	xbmcplugin.addDirectoryItem(_handle_, get_url(action='search'), searchMenu, True)
 	for category in _categories_:
 		list_item = xbmcgui.ListItem(label=category['label'])
 		list_item.setInfo('video', {'title':category['label']})
+		list_item.setArt({'thumb': os.path.join(current_dir, 'resources', category['icon'])})
 		url = get_url(action='listmovies', url=category['url'])
 		xbmcplugin.addDirectoryItem(_handle_, url, list_item, True)
 	xbmcplugin.endOfDirectory(_handle_)
@@ -151,7 +158,7 @@ def list_seasons_or_episodes(url):
 			list_item.setProperty('IsPlayable', 'false')
 			url = get_url(action='listseasonepisodes', movieid=s.get('data-season'))
 			xbmcplugin.addDirectoryItem(_handle_, url, list_item, True)
-	response = get_hdviet_link(_domain_ + '/lay-danh-sach-tap-phim.html?id=' + mid)
+	response = get_hdviet_link(_domain_ + '/lay-danh-sach-tap-phim.html?id=' + mid, True)
 	if response is None:
 		xbmcplugin.endOfDirectory(_handle_)
 	data = json.loads(response)
@@ -171,7 +178,7 @@ def list_seasons_or_episodes(url):
 def list_season_episodes(movieid):
 	xbmcplugin.setPluginCategory(_handle_, 'HDViet')
 	xbmcplugin.setContent(_handle_, 'movies')
-	response = get_hdviet_link(_domain_ + '/lay-danh-sach-tap-phim.html?id=' + movieid)
+	response = get_hdviet_link(_domain_ + '/lay-danh-sach-tap-phim.html?id=' + movieid, True)
 	if response is None:
 		xbmcplugin.endOfDirectory(_handle_)
 	data = json.loads(response)
@@ -192,7 +199,7 @@ def play_video(url):
 		return
 	mid = re.search("mid:[\s]?(.*),", response).group(1)
 	sequence = re.search("CurrentEpisode:[\s]?'(.*)'", response).group(1)
-	response = get_hdviet_link(_domain_ + '/get_movie_play_json?movieid=' + mid + '&sequence=' + sequence)
+	response = get_hdviet_link(_domain_ + '/get_movie_play_json?movieid=' + mid + '&sequence=' + sequence, True)
 	if response is None:
 		return
 	data = json.loads(response)
@@ -229,7 +236,7 @@ def login():
 		_addon_.setSetting('OAuthSessionToken', request.session.cookies.get(_auth_cookie_name_))
 		return True
 
-def get_hdviet_link(url):
+def get_hdviet_link(url, doNotCheckLogin=False):
 	if _addon_.getSetting('Username') != '' and _addon_.getSetting('Password') != '':
 		if _addon_.getSetting('SessionToken') != '' and _addon_.getSetting('OAuthSessionToken') != '' :
 			print('Using existing session token to get url')
@@ -237,7 +244,7 @@ def get_hdviet_link(url):
 			response = request.get(url)
 			
 			soup = BeautifulSoup(response, "html.parser")
-			if request.r.status_code == 302 or soup.select_one('li.liuser > a.userinfo') is None:
+			if doNotCheckLogin == False and (request.r.status_code == 302 or soup.select_one('li.liuser > a.userinfo') is None):
 				print('Re-login to get url')
 				isLoggedIn = login()
 				if isLoggedIn: 
